@@ -105,3 +105,4 @@ CASE
   END AS recommendation
 FROM CityBikeLanes
 GROUP BY street;
+
