@@ -1,0 +1,34 @@
+*** In this project I created a table called CityBikeLanes in SQLiteStudio, added data to it, then performed queries on it to explore and answer the following questions.
+
+**Expore the data to get familiar with it.
+
+SELECT * FROM CityBikeLanes 
+LIMIT 10;
+
+**List the bike lanes that were updated in 2021 from most to least safest.
+
+SELECT street, safetyrating, year_updated
+FROM BIT_DB.CityBikeLanes
+WHERE year_updated LIKE 2021
+ORDER BY safetyrating DESC;
+
+**Find the bike lanes that have an average safety rating of 4.0 or higher and label them as “Safe Lane”.
+
+WITH average_safety_CTE AS
+(SELECT c.street, AVG(c.safetyrating) AS average_safetyrating
+FROM CityBikeLanes c
+GROUP BY c.street)
+SELECT street, average_safetyrating, 'Safe Lane' AS tag
+FROM average_safety_CTE
+WHERE average_safetyrating >= 4.0;
+
+**Give recommendations on which lanes to leave as-is, improve, or remove based on the average safety rating.
+
+SELECT street, safetyrating as "average_safety_rating",
+CASE 
+  WHEN AVG(safetyrating) OVER (PARTITION BY street) >= 4.0 THEN "Leave As-Is"
+  WHEN AVG(safetyrating) OVER (PARTITION BY street) < 2.5 THEN "Remove"
+  ELSE "Improvements Needed"
+  END AS recommendation
+FROM CityBikeLanes
+GROUP BY street;
