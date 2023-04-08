@@ -1,0 +1,56 @@
+*** In this project I queried a database called “chinook” that included 11 tables about music sales using SQL.
+
+** What are the top 5 genres based on total number of sales?
+
+SELECT g.Name, SUM(i.Quantity) as "Total"
+FROM chinook.invoice_items i 
+JOIN chinook.tracks t
+ON i.TrackId = t.TrackId
+JOIN chinook.genres g
+ON t.GenreId = g.GenreId
+GROUP BY g.Name
+ORDER BY Total DESC
+LIMIT 5;
+
+**Classify each genre into a “Performance Group” based on their total number of sales.
+
+SELECT g.Name, SUM(i.Quantity) as "Total",
+CASE
+WHEN SUM(i.Quantity) >= 150 THEN "Best"
+WHEN SUM(i.Quantity) <= 30 THEN "Worst"
+ELSE "Average"
+END AS Performance_Group
+FROM chinook.invoice_items i 
+JOIN chinook.tracks t
+ON i.TrackId = t.TrackId
+JOIN chinook.genres g
+ON t.GenreId = g.GenreId
+GROUP BY g.Name;
+
+**List the tracks bought by each customer in 2010.
+
+SELECT c.FirstName, c.LastName, t.Name, i.InvoiceDate
+FROM chinook.customers c
+JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+JOIN chinook.invoice_items ii
+ON i.InvoiceId = ii.InvoiceId
+JOIN chinook.tracks t
+ON ii.TrackId = t.TrackId
+WHERE i.InvoiceDate LIKE '2010%'
+GROUP BY c.FirstName, c.LastName, t.Name;
+
+**Which employee had the most revenue in 2011?
+
+SELECT e.FirstName, e.LastName, SUM(ii.Quantity)*ii.UnitPrice as Revenue
+FROM chinook.employees e
+JOIN chinook.customers c
+ON e.EmployeeId = c.SupportRepId
+JOIN chinook.invoices i
+ON c.CustomerId = i.CustomerId
+JOIN chinook.invoice_items ii
+ON i.InvoiceId = ii.InvoiceId
+WHERE i.InvoiceDate LIKE '2011%'
+GROUP BY e.FirstName, e.LastName
+ORDER BY Revenue DESC
+LIMIT 1;
